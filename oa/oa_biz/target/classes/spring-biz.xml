@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/tx
+ http://www.springframework.org/schema/tx/spring-tx.xsd"
+ xmlns:tx="http://www.springframework.org/schema/tx"
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:context="http://www.springframework.org/schema/context"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns="http://www.springframework.org/schema/beans">
+    <!--引入dao层的配置文件-->
+   <import resource="spring-dao.xml"></import>
+
+    <!--开启自动扫描包-->
+    <context:component-scan base-package="com.immoc.oa.biz"></context:component-scan>
+
+    <!--Aspect自动代理-->
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+    <!--配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <!--需要引入数据源-->
+        <property name="dataSource"  ref="dataSource"></property>
+    </bean>
+    <!--配置消息通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="search*" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--配置切入点-->
+    <aop:config>
+        <aop:pointcut id="txpc" expression="execution(* com.immoc.oa.biz.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txpc"></aop:advisor>
+    </aop:config>
+</beans>
